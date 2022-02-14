@@ -65,6 +65,11 @@ def get_gifts_for_person(person):
         cur.execute("select product, external_link from gift_idea where person_id = %s", (person,))
         return cur.fetchall()
 
+def get_name_for_person(person):
+    with get_db_cursor() as cur:
+        cur.execute("select name from person where person_id = %s", (person,))
+        return cur.fetchone()['name']
+
 def get_most_popular_gift():
     with get_db_cursor() as cur:
         cur.execute("select product, external_link from gift_idea group by product, external_link order by count(*) desc;")

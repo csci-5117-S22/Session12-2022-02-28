@@ -10,8 +10,20 @@
 
   <link rel="stylesheet" href="/static/main.css">
   
-  <title>  csc5117-gift tool</title>
+  <title> {% block title %}{% endblock %} csci5117-gift tool</title>
 </head>
+
+
+
+{% macro gift_widget(data) -%}
+{# I make the a tag become block in css so it acts like a div. #}
+<a href="{{data['external_link']}}" class = "gift">
+  {# https://stackoverflow.com/questions/4476526/do-i-use-img-object-or-embed-for-svg-files #}
+  <object class="icon" data="/static/gift-svgrepo-com.svg" type="image/svg+xml">
+  </object>
+  <p class="label">{{data["product"]}}</p>
+</a>
+{%- endmacro %}
 
 <body>
   <div id="menu">
@@ -37,4 +49,5 @@
     {% endblock %}
   </div>
 </div>
+<footer>This is a footer</footer>
 </html>

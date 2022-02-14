@@ -24,6 +24,12 @@ def new_person():
     db.add_person(name)
     return redirect(url_for('people'))
 
+@app.route('/people/<person_id>', methods=['GET'])
+def get_person(person_id):
+    name = db.get_name_for_person(person_id)
+    gifts = db.get_gifts_for_person(person_id)
+    return render_template("person.html", name=name, gifts=gifts)
+
 @app.route('/api/foo')
 def api_foo():
     data = {

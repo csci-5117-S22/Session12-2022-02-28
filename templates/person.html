@@ -1,0 +1,14 @@
+{% extends "parent.html" %}
+
+{% block title %} {{name}} - {% endblock %}
+{% block content %}
+<h1>{{name}}</h1>
+<ul>
+  {% for gift in gifts %}
+    <li>{{ gift_widget(gift) }}</li>
+  {% endfor %}
+</ul>
+
+{% endblock %}
+
+

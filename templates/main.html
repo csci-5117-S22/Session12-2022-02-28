@@ -1,13 +1,9 @@
 {% extends "parent.html" %}
+{% block title %} HOME - {% endblock %}
 {% block content %}
 <h1> Top Gift</h1>
 
-{# I make the a tag become block in css so it acts like a div. #}
-<a href="{{top_gift['external_link']}}" class = "gift">
-  {# https://stackoverflow.com/questions/4476526/do-i-use-img-object-or-embed-for-svg-files #}
-  <object class="icon" data="static/gift-svgrepo-com.svg" type="image/svg+xml">
-  </object>
-  <p class="label">{{top_gift["product"]}}</p>
-</a>
+
+{{gift_widget(top_gift)}}
 
 {% endblock %}
