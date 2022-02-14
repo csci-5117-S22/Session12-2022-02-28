@@ -44,3 +44,28 @@ def get_db_cursor(commit=False):
               connection.commit()
       finally:
           cursor.close()
+
+def add_person (name):
+    # Since we're using connection pooling, it's not as big of a deal to have
+    # lots of short-lived cursors (I think -- worth testing if we ever go big)
+    with get_db_cursor(True) as cur:
+        current_app.logger.info("Adding person %s", name)
+        cur.execute("INSERT INTO person (name) values (%s)", (name,))
+
+def get_people(page = 0, people_per_page = 10):
+    ''' note -- result can be used as list of dictionaries'''
+    limit = people_per_page
+    offset = page*people_per_page
+    with get_db_cursor() as cur:
+        cur.execute("select * from person order by person_id limit %s offset %s", (limit, offset))
+        return cur.fetchall()
+
+def get_gifts_for_person(person):
+    with get_db_cursor() as cur:
+        cur.execute("select product, external_link from gift_idea where person_id = %s", (person,))
+        return cur.fetchall()
+
+def get_most_popular_gift():
+    with get_db_cursor() as cur:
+        cur.execute("select product, external_link from gift_idea group by product, external_link order by count(*) desc;")
+        return dict(cur.fetchone())

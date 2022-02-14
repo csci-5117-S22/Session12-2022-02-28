@@ -11,25 +11,18 @@ def initialize():
 
 @app.route('/')
 def home():
-    user_name = request.args.get("userName", "unknown")
-    return render_template('main.html', user=user_name)
+    
+    return render_template('main.html', top_gift = db.get_most_popular_gift())
 
 @app.route('/people', methods=['GET'])
 def people():
-    with db.get_db_cursor() as cur:
-        cur.execute("SELECT * FROM person;")
-        names = [record[1] for record in cur]
-
-        return render_template("people.html", names=names)
+    return render_template("people.html", people=db.get_people())
 
 @app.route('/people', methods=['POST'])
 def new_person():
-    with db.get_db_cursor(True) as cur:
-        name = request.form.get("name", "unnamed friend")
-        app.logger.info("Adding person %s", name)
-        cur.execute("INSERT INTO person (name) values (%s)", (name,))
-        
-        return redirect(url_for('people'))
+    name = request.form.get("name", "unnamed friend")
+    db.add_person(name)
+    return redirect(url_for('people'))
 
 @app.route('/api/foo')
 def api_foo():
@@ -42,4 +35,3 @@ def api_foo():
         }
     }
     return jsonify(data)
-
