@@ -87,8 +87,8 @@ def upload_image(data, filename):
         cur.execute("insert into images (filename, data) values (%s, %s)", (filename, data))
 
 def get_image_ids():
-    with get_db_cursor as cur:
-        cur.execute("select image_id from images order by image_id desc ;")
+    with get_db_cursor() as cur:
+        cur.execute("select image_id from images;")
         return [r['image_id'] for r in cur]
         
         

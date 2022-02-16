@@ -9,7 +9,7 @@
 {% endif %}
 
 <div class="imageGallery pure-g">
-  {% for id in imageIds %}
+  {% for id in image_ids %}
     <img class="pure-u-1-6 image" src="{{url_for("view_image", img_id=id)}}"/>
   
   {% endfor %}
