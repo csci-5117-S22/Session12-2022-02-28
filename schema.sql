@@ -26,4 +26,9 @@ insert into gift_idea (person_id, product, external_link) values (3, 'LOTR first
 insert into gift_idea (person_id, product, external_link) values (4, 'Laser cutter', 'https://all3dp.com/1/best-home-desktop-laser-cutter-engraver-aio-machine/');
 
 
-
+-- A table to hold images.
+create table images (
+  image_id SERIAL PRIMARY KEY,
+  filename text,
+  data bytea
+);

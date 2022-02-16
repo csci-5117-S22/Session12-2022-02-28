@@ -74,3 +74,21 @@ def get_most_popular_gift():
     with get_db_cursor() as cur:
         cur.execute("select product, external_link from gift_idea group by product, external_link order by count(*) desc;")
         return dict(cur.fetchone())
+
+
+
+def get_image(img_id):
+    with get_db_cursor() as cur:
+        cur.execute("SELECT * FROM images where image_id=%s", (img_id,))
+        return cur.fetchone()
+
+def upload_image(data, filename):
+    with get_db_cursor(True) as cur:
+        cur.execute("insert into images (filename, data) values (%s, %s)", (filename, data))
+
+def get_image_ids():
+    with get_db_cursor as cur:
+        cur.execute("select image_id from images order by image_id desc ;")
+        return [r['image_id'] for r in cur]
+        
+        
