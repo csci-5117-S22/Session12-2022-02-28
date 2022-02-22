@@ -1,15 +1,76 @@
-from flask import Flask, render_template, request, g, redirect, url_for, jsonify, send_file
+from flask import Flask, render_template, request, g, redirect, url_for, jsonify, send_file, session
 from werkzeug.utils import secure_filename
 import io
+
+from functools import wraps
+import json
+from os import environ as env
+from werkzeug.exceptions import HTTPException
+from dotenv import load_dotenv, find_dotenv
+from authlib.integrations.flask_client import OAuth
+from six.moves.urllib.parse import urlencode
+
+
 
 import db
 
 app = Flask(__name__)
+app.secret_key = "i dunnoestfbhjmlk,"
+
+oauth = OAuth(app)
+
+AUTHO0_CLIENT_ID = env['auth0_client_id']
+AUTHO0_CLIENT_SECRET = env['auth0_client_secret']
+AUTHO0_DOMAIN = env['auth0_domain']
+
+auth0 = oauth.register(
+    'auth0',
+    client_id=AUTHO0_CLIENT_ID,
+    client_secret=AUTHO0_CLIENT_SECRET,
+    api_base_url='https://'+AUTHO0_DOMAIN,
+    access_token_url='https://'+AUTHO0_DOMAIN+'/oauth/token',
+    authorize_url='https://'+AUTHO0_DOMAIN+'/authorize',
+    client_kwargs={
+        'scope': 'openid profile email',
+    },
+)
 
 # have the DB submodule set itself up before we get started. groovy.
 @app.before_first_request
 def initialize():
     db.setup()
+
+
+
+###### AUTH STUFF
+
+@app.route('/callback')
+def callback_handling():
+    # Handles response from token endpoint
+    auth0.authorize_access_token()
+    resp = auth0.get('userinfo')
+    userinfo = resp.json()
+
+    # Store the user information in flask session.
+    session['jwt_payload'] = userinfo
+    session['profile'] = {
+        'user_id': userinfo['sub'],
+        'name': userinfo['name'],
+        'picture': userinfo['picture']
+    }
+    return redirect(url_for('home'))
+
+@app.route('/login')
+def login():
+    return auth0.authorize_redirect(redirect_uri=url_for('callback_handling', _external = True))
+
+
+
+
+
+
+
+
 
 @app.route('/')
 def home():

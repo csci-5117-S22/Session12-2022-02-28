@@ -33,3 +33,5 @@ heroku pg:psql
 # run
 heroku local dev
 ```
+
+setup auth0 by configuring extra .env parameters. You may wish to set these up against heroku as well if you want to run in the production environment.
