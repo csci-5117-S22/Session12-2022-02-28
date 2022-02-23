@@ -88,7 +88,7 @@ def upload_image(data, filename):
 
 def get_image_ids():
     with get_db_cursor() as cur:
-        cur.execute("select image_id from images;")
+        cur.execute("select image_id from images order by image_id desc limit 12 ;")
         return [r['image_id'] for r in cur]
         
         
