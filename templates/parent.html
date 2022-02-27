@@ -8,8 +8,16 @@
   <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/pure-min.css" integrity="sha384-LTIDeidl25h2dPxrB2Ekgc9c7sEC3CWGM6HeFmuDNUjX76Ert4Z4IY714dhZHPLd" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/grids-responsive-min.css" />
 
+
   <link rel="stylesheet" href="/static/main.css">
-  
+
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
   <title> {% block title %}{% endblock %} csci5117-gift tool</title>
 </head>
 
@@ -17,11 +25,38 @@
 
 {% macro gift_widget(data) -%}
 {# I make the a tag become block in css so it acts like a div. #}
-<a href="{{data['external_link']}}" class = "gift">
+<a href="{{data['external_link']}}" class = "gift" id="{{data.gift_idea_id}}-overall">
   {# https://stackoverflow.com/questions/4476526/do-i-use-img-object-or-embed-for-svg-files #}
   <object class="icon" data="/static/gift-svgrepo-com.svg" type="image/svg+xml">
   </object>
   <p class="label">{{data["product"]}}</p>
+  <div class="bought_box">
+    {% if session['profile'] %} 
+    {# logged in users get the checkbox #}
+    <input type="checkbox" 
+      {% if data.purchased %} checked {% endif %} 
+      id="{{data.gift_idea_id}}-purchase"/>
+      <br/>
+      bought?
+
+      {# this script makes the checkbox interactive #}
+      <script>
+        $('#{{data.gift_idea_id}}-purchase').click(function(){
+          var bought = this.checked;
+          // This is a little lazy -- we don't check if the request worked or not or do anything to show the user there's an active request
+          // This can all be done, but we are not doing it right now.
+          $.ajax({
+            url: "{{url_for('buy_gift', gift_id=data.gift_idea_id)}}",
+            data: {
+              bought: bought
+            },
+            type:'POST'
+          })
+        });
+      </script>
+
+    {% endif %}    
+    </div>
 </a>
 {%- endmacro %}
 
@@ -33,19 +68,17 @@
           <li class="pure-menu-item">
             <a href="{{ url_for("home") }}" class="pure-menu-link">Home</a>
           </li>
-          <li class="pure-menu-item">
-            <a href="{{ url_for("people") }}" class="pure-menu-link">People</a>
-          </li>
-          <li class="pure-menu-item">
-            <a href="{{ url_for("api_foo") }}" class="pure-menu-link">API test</a>
-          </li>
-          <li class="pure-menu-item">
-            <a href="{{ url_for("image_gallery") }}" class="pure-menu-link">Images</a>
-          </li>      
-          
+          {% if not session['profile'] %}
           <li class="pure-menu-item">
             <a href="{{ url_for("login") }}" class="pure-menu-link">Login</a>
           </li>          
+          {% else %}
+          <li class="pure-menu-item logout">
+            <a href="{{ url_for("get_person", person_id=session.profile.user_id) }}" class="pure-menu-link"> <img src="{{session.profile.picture}}" class='profile'/> my profile </a>
+          </li>     <li class="pure-menu-item logout">
+            <a href="{{ url_for("logout") }}" class="pure-menu-link">  Logout</a>
+          </li>     
+          {% endif %}
         </ul>
     </div>
   </div>
@@ -55,5 +88,4 @@
     {% endblock %}
   </div>
 </div>
-<footer>This is a footer</footer>
 </html>

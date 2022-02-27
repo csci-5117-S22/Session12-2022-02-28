@@ -1,13 +1,74 @@
 {% extends "parent.html" %}
 
-{% block title %} {{name}} - {% endblock %}
+{% block title %} {{profile.name}} - {% endblock %}
 {% block content %}
-<h1>{{name}}</h1>
-<ul>
+<img src="{{profile.image}}" class = "profile_image"> </img>
+<h1>{{profile.name}}</h1>
+
+{% if session['profile'] and session.profile.user_id == profile.person_id %}
+{# user is viewing themselves #}
+  {% if profile.first_time %}
+    <div id="dialog" title="First time?">
+      Howdy! It looks like it's your first time here. Make sure you update your profile and tell people what kind of gifts you're looking for!
+    </div>
+    <script>
+      $( function() {
+        $( "#dialog" ).dialog();
+      } );
+      </script>
+  {% endif %}
+
+  <div class="description" id="editor">
+    {# safe -- because I ACTUALLY DO want raw html. we do work python side to MAKE SURE it's safe. #}
+    {{profile.description|safe}}
+  </div>
+  <button id="do_edit">edit description</button>
+  <button id="save">save</button>
+  <form id="quill-submit-form" action="{{url_for('save_person', person_id=profile.person_id)}}" method="post">
+    <input type="hidden" name="quill-html" id="quill-html"/>
+  </form>
+  <script>
+    $("#save").hide();
+
+    $("#do_edit").click(function(){
+      $("#do_edit").hide();
+      
+      $("#save").show()
+      
+      var quill = new Quill('#editor', {
+        theme: 'snow'
+      });
+
+      // https://lucidar.me/en/rich-content-editor/how-to-get-html-content-from-quill-rich-editor/ 
+      $("#save").click(function(){
+        contents = quill.root.innerHTML;
+        $("#quill-html").val(contents);
+        $("#quill-submit-form").submit();
+      });
+    });
+  </script>
+
+  There are {{gifts|length}} gift ideas for you. And you don't get to see ANY OF THEM!
+{% else %}
+{# user is viewing others #}
+<div class="description">
+  {{profile.description|safe}}
+ </div>
   {% for gift in gifts %}
-    <li>{{ gift_widget(gift) }}</li>
+    {{ gift_widget(gift) }}</li>
   {% endfor %}
-</ul>
+  {% if session['profile'] %}
+    <h1> Add a new gift: </h1>
+    <form class="pure-form-stacked" action="{{url_for('add_gift', person_id=profile.person_id)}}" method="post">
+      <label for="idea">Your idea</label>
+      <input name="idea", id="idea" placeholder="Idea Name" required/>
+      <label for="link">link to product</label>
+      <input name="link", id="link" type="url" placeholder="link to product" required/>
+      <button type="submit" class="pure-button pure-button-primary">Add idea</button>
+    </form>
+  {% endif %}
+{% endif %}
+
 
 {% endblock %}
 

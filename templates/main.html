@@ -1,13 +1,20 @@
 {% extends "parent.html" %}
 {% block title %} HOME - {% endblock %}
 {% block content %}
-<h1> Top Gift</h1>
-
-
-{{gift_widget(top_gift)}}
-
-<pre>
-    {{session['jwt_payload']}}
-</pre>
+<h1>people:</h1>
+  <div class = "pure-g">
+  {% for person in people %}
+  {% if (not session['profile'] or person['person_id'] != session.profile.user_id) %}
+    <div class="profile_card pure-u-xl-1-6 pure-u-lg-1-4 pure-u-md-1-3 pure-u-sm-1-1">
+        <a href="{{url_for('get_person', person_id=person['person_id'])}}">
+            <img src="{{person['image']}}">
+            <div>
+                {{ person["name"] }}
+            </div>
+        </a>
+    </div>
+  {% endif %}
+  {% endfor %}
+</div>
 
 {% endblock %}

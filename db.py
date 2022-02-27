@@ -45,50 +45,46 @@ def get_db_cursor(commit=False):
       finally:
           cursor.close()
 
-def add_person (name):
-    # Since we're using connection pooling, it's not as big of a deal to have
-    # lots of short-lived cursors (I think -- worth testing if we ever go big)
-    with get_db_cursor(True) as cur:
-        current_app.logger.info("Adding person %s", name)
-        cur.execute("INSERT INTO person (name) values (%s)", (name,))
 
-def get_people(page = 0, people_per_page = 10):
+# person table
+
+def create_or_update_user(person_id, person_name, person_picture):
+    with get_db_cursor(True) as cur:
+        current_app.logger.info("Adding person %s", person_name)
+        cur.execute("""INSERT INTO person (person_id, name, image) 
+                                   values (%s, %s, %s)
+                        ON CONFLICT (person_id) DO UPDATE SET name=%s, image=%s""", (person_id, person_name, person_picture, person_name, person_picture))
+
+def get_people(page = 0, per_page = 12):
     ''' note -- result can be used as list of dictionaries'''
-    limit = people_per_page
-    offset = page*people_per_page
+    limit = per_page
+    offset = page*per_page
     with get_db_cursor() as cur:
         cur.execute("select * from person order by person_id limit %s offset %s", (limit, offset))
         return cur.fetchall()
 
-def get_gifts_for_person(person):
+def get_gifts_for_person(person, page = 0, per_page = 12):
+    limit = per_page
+    offset = page*per_page
     with get_db_cursor() as cur:
-        cur.execute("select product, external_link from gift_idea where person_id = %s", (person,))
+        cur.execute("select * from gift_idea where person_id = %s limit %s offset %s", (person, limit, offset))
         return cur.fetchall()
 
-def get_name_for_person(person):
+def get_person(person_id):
     with get_db_cursor() as cur:
-        cur.execute("select name from person where person_id = %s", (person,))
-        return cur.fetchone()['name']
-
-def get_most_popular_gift():
-    with get_db_cursor() as cur:
-        cur.execute("select product, external_link from gift_idea group by product, external_link order by count(*) desc;")
-        return dict(cur.fetchone())
-
-
-
-def get_image(img_id):
-    with get_db_cursor() as cur:
-        cur.execute("SELECT * FROM images where image_id=%s", (img_id,))
+        cur.execute("select * from person where person_id = %s", (person_id,))
         return cur.fetchone()
 
-def upload_image(data, filename):
+def update_description(person_id, description):
     with get_db_cursor(True) as cur:
-        cur.execute("insert into images (filename, data) values (%s, %s)", (filename, data))
+        cur.execute("update person set description=%s, first_time=False where person_id = %s", (description, person_id))
 
-def get_image_ids():
-    with get_db_cursor() as cur:
-        cur.execute("select image_id from images order by image_id desc limit 12 ;")
-        return [r['image_id'] for r in cur]
-        
-        
+def add_idea(person_id, name, link):
+    with get_db_cursor(True) as cur:
+        cur.execute("""INSERT INTO gift_idea (person_id, product, external_link, purchased) 
+                                   values (%s, %s, %s, False)""", 
+                                   (person_id, name, link))
+
+def update_gift(gift_id, bought):
+    with get_db_cursor(True) as cur:
+        cur.execute("update gift_idea set purchased=%s where gift_idea_id = %s", (bought, gift_id))
