@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, g, redirect, url_for, jsonify, send_file, session
+from flask import Flask, render_template, request, g, redirect, url_for, jsonify, send_file, session, abort
 from werkzeug.utils import secure_filename
 import io
 
@@ -99,15 +99,21 @@ def save_person(person_id):
 
 @app.route('/people/<person_id>/gift', methods=['POST'])
 def add_gift(person_id):
-    name = request.form['idea']
-    link = request.form['link']
-    
-    db.add_idea(person_id, name, link)
+    # CUSTOM AUTH -- only if logged in, and not an idea for yourself..
+    if 'profile' in session and session['profile']['user_id'] != person_id:
+        name = request.form['idea']
+        link = request.form['link']
+        
+        db.add_idea(person_id, name, link)
 
     return redirect(url_for('get_person', person_id = person_id))
 
 @app.route('/gift/<gift_id>', methods=['POST'])
 def buy_gift(gift_id):
-    bought = request.form['bought']
-    db.update_gift(gift_id, bought)
-    return jsonify(status="OK")
+    # in theory we should do some more custom auth here. that's on the TODO list.
+    if 'profile' in session:
+        bought = request.form['bought']
+        db.update_gift(gift_id, bought)
+        return jsonify(status="OK")
+    else:
+        return jsonify(status="error", message="you have to be logged in."), 403
