@@ -17,7 +17,7 @@ with db.get_db_cursor(True) as cur:
         reader = list(reader)
         random.shuffle(reader)
         for row in reader[:5000]: # just take 5000 movies -- I have a row limit to think about!
-            cur.execute("insert into movie (movieid, title, synopsis) values (%s, %s, %s);", (row['imdb_id'], row['title'], row['plot_synopsis']))
+            cur.execute("insert into movie (movieid, title, synopsis, search) values (%s, %s, %s, to_tsvector('english', %s));", (row['imdb_id'], row['title'], row['plot_synopsis'], row['plot_synopsis']))
 
 
     
