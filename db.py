@@ -20,7 +20,6 @@ pool = None
 def setup():
     global pool
     DATABASE_URL = os.environ['DATABASE_URL']
-    current_app.logger.info(f"creating db connection pool")
     pool = ThreadedConnectionPool(1, 100, dsn=DATABASE_URL, sslmode='require')
 
 
@@ -88,3 +87,4 @@ def add_idea(person_id, name, link):
 def update_gift(gift_id, bought):
     with get_db_cursor(True) as cur:
         cur.execute("update gift_idea set purchased=%s where gift_idea_id = %s", (bought, gift_id))
+

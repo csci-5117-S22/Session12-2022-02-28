@@ -75,7 +75,8 @@
           {% else %}
           <li class="pure-menu-item logout">
             <a href="{{ url_for("get_person", person_id=session.profile.user_id) }}" class="pure-menu-link"> <img src="{{session.profile.picture}}" class='profile'/> my profile </a>
-          </li>     <li class="pure-menu-item logout">
+          </li>     
+          <li class="pure-menu-item logout">
             <a href="{{ url_for("logout") }}" class="pure-menu-link">  Logout</a>
           </li>     
           {% endif %}

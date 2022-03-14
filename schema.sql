@@ -17,3 +17,16 @@ create table gift_idea (
   external_link text,
   purchased boolean
 );
+
+drop table if exists movie;
+
+create table movie (
+  movieid varchar(256) primary key,
+  title text,
+  synopsis text
+);
+-- indexes instruct the database about what types of queries you will run
+-- this says "I'm going to do full text searches -- plan on it so it's fast"
+-- adding this took my search time from about 10 seconds to 0.23 seconds
+-- you can also explicitly store "term vectors" to speed things up further.
+CREATE INDEX movie_search_idx ON movie USING GIN (to_tsvector('english', synopsis));
